@@ -1,0 +1,37 @@
+# Analyzing election results
+
+# Set up 
+library(tidyverse)
+raw_data <- read.csv("https://raw.githubusercontent.com/alex/nyt-2020-election-scraper/master/all-state-changes.csv")
+
+# Basic dataframe exploration
+num_cols <- ncol(raw_data)
+num_rows <- nrow(raw_data)
+num_states <- length(unique(raw_data$state))
+num_timestamps <- length(unique(raw_data$timestamp))
+
+# the number of timestamps varies for each state
+timestamps_by_state <- raw_data %>% 
+  group_by(state) %>% 
+  count()
+
+# Formatting: split out state name from electoral votes
+data <- raw_data %>% 
+  separate(state, into=c("state", "ev"), " \\(") %>% 
+  mutate(ev = parse_number(ev)) 
+
+# How many reported timestamps exist for each state?
+
+
+# When did Biden take the lead in Georgia?
+ga_lead_time <- data %>% 
+  filter(state == "Georgia", leading_candidate_name == "Biden") %>% 
+  filter(timestamp == min(timestamp)) %>% 
+  pull(timestamp)
+  
+# lubridate package, part of tidyverse deal with time, https://lubridate.tidyverse.org
+
+# What is the differenece in votes in each state?
+
+
+# How do total votes change over time? (by candidate)

@@ -12,9 +12,9 @@ num_states <- length(unique(raw_data$state))
 num_timestamps <- length(unique(raw_data$timestamp))
 
 # the number of timestamps varies for each state
-timestamps_by_state <- raw_data %>% 
-  group_by(state) %>% 
-  count()
+# timestamps_by_state <- raw_data %>% 
+#   group_by(state) %>% 
+#   count()
 
 # Formatting: split out state name from electoral votes
 # Add biden and trump vote columns 
@@ -22,18 +22,24 @@ data <- raw_data %>%
   separate(state, into=c("state", "ev"), " \\(") %>% 
   mutate(ev = parse_number(ev)) %>% 
   mutate(biden_votes = 
-           if_else(leading_candidate_name == "Biden", # condition 
-                               leading_candidate_votes, # if true
-                               trailing_candidate_votes # if false 
-                               ), 
+           if_else(leading_candidate_name == "Biden", # condition
+                   leading_candidate_votes, # if true
+                   trailing_candidate_votes # if false
+                   ), 
          trump_votes = total_votes_count - biden_votes
   )
 
 # Quick check!
 check <- data %>% 
   mutate(total_check = trump_votes + biden_votes, 
-         done_correctly = if_else(total_check == total_votes_count, 1, 0)) %>% 
+         done_correctly = if_else(total_check == total_votes_count, 1, 0)) %>%
   summarize(total_correct = sum(done_correctly))
+
+# The number of timestamps varies for each state
+timestamps_by_state <- data %>% 
+  group_by(state) %>% 
+  count() %>% 
+  arrange(-n)
 
 # How many reported timestamps exist for each state?
 
@@ -48,9 +54,9 @@ ga_lead_time <- data %>%
 # (slightly different from "taking the lead")
 biden_lead_time <- data %>% 
   group_by(state) %>% 
-  filter(leading_candidate_name == "Biden") %>% 
+  filter(leading_candidate_name=="Biden") %>% 
   filter(timestamp == min(timestamp)) %>% 
-  select(state, timestamp) 
+  select(state, timestamp)
 
 
 # lubridate package, part of tidyverse deal with time, https://lubridate.tidyverse.org
@@ -66,11 +72,16 @@ vote_diff <- data %>%
 vote_diff_plot <- ggplot(data = vote_diff) +   # same using "data =" or not
   geom_col(mapping = aes(x = vote_diff,        # same using "mapping =" or not
                          y = reorder(state, vote_diff), 
-                         fill = leading_candidate_name)) + 
-  scale_fill_manual(values=c("blue", "red")) + 
-  labs(y = "State")
+                         fill = leading_candidate_name)) +
+  scale_fill_manual(values=c("blue", "red")) +
+  labs(y = "State", x = "Vote Difference", fill = "Candidate", 
+       title = "Vote difference at most recent time stamp")
 
 vote_pct_plot <- ggplot(vote_diff) + 
   geom_col(mapping = aes(x = pct_diff, y = reorder(state, pct_diff)))
 
+# git commit -am "Complete analysis" , add and commit at same time. 
+
 # How do total votes change over time? (by candidate)
+
+

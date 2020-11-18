@@ -4,6 +4,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+# before :: is package, and after is function 
 knitr::opts_chunk$set(echo = FALSE)
 library(kableExtra)
 source("analysis.R")
